@@ -1,0 +1,11 @@
+.cache
+
+.project
+.classpath
+.settings/
+
+bin/
+target/
+
+release.properties
+pom.xml.releaseBackup
