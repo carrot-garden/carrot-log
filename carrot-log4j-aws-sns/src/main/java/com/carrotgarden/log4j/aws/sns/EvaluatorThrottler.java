@@ -35,16 +35,19 @@ public class EvaluatorThrottler implements Evaluator {
 	public static final TimeUnit DEFAULT_UNIT = TimeUnit.MINUTES;
 	public static final Signature DEFAULT_SIGNATURE = Signature.DEFAULT;
 
+	/** cache after-write retention period value */
 	@JsonProperty
 	protected long period = DEFAULT_PERIOD;
 
+	/** cache after-write retention period unit */
 	@JsonProperty
 	protected TimeUnit timeUnit = DEFAULT_UNIT;
 
+	/** cache event signature */
 	@JsonProperty
 	protected Signature signature = DEFAULT_SIGNATURE;
 
-	/** ( event-signature, is-event-present ) */
+	/** event cache map : [ event-signature, is-event-present ] */
 	private Cache<String, Boolean> eventCache;
 
 	protected void ensureCache() {

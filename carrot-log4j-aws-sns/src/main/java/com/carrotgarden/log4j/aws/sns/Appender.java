@@ -17,6 +17,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.Layout;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.helpers.OptionConverter;
 import org.apache.log4j.spi.LoggingEvent;
@@ -81,6 +82,11 @@ public class Appender extends AppenderSkeleton {
 	/** log4j option; maximum thread pool size; optional */
 	@JsonProperty
 	protected int poolMax = DEFAULT_POOL_MAX;
+
+	@JsonProperty
+	public Layout getLaoyut() {
+		return super.getLayout();
+	}
 
 	//
 

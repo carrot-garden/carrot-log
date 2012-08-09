@@ -10,15 +10,16 @@ package com.carrotgarden.log4j.aws.sns;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.TriggeringEventEvaluator;
 
-/** provide signature and subject */
+/** provide signature and accept configuration */
 public interface Evaluator extends TriggeringEventEvaluator {
 
 	@Override
 	boolean isTriggeringEvent(LoggingEvent event);
 
-	/** unique event key for event cache */
+	/** make unique event key for the event cache */
 	String makeEventSignature(LoggingEvent event);
 
-	void apply(String props);
+	/** change evaluator configuration via key=value properties text */
+	void apply(String propsText);
 
 }

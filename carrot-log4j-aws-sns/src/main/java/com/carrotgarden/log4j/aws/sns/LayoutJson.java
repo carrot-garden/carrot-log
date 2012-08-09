@@ -16,15 +16,17 @@ import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 
 /**
+ * render log4j event in json format
+ * 
  * original idea from
  * 
  * https://github.com/Aconex/json-log4j-layout
  * 
  * TODO auto size limit
- * 
  */
 public class LayoutJson extends Layout {
 
@@ -52,6 +54,7 @@ public class LayoutJson extends Layout {
 
 	//
 
+	@JsonProperty
 	protected String fieldError = "error";
 
 	@Override
@@ -99,14 +102,23 @@ public class LayoutJson extends Layout {
 
 	}
 
+	@JsonProperty
 	protected String fieldLog = "log";
+	@JsonProperty
 	protected String fieldLevel = "level";
+	@JsonProperty
 	protected String fieldTime = "time";
+	@JsonProperty
 	protected String fieldThread = "thread";
+	@JsonProperty
 	protected String fieldMessage = "message";
+	@JsonProperty
 	protected String fieldFile = "file";
+	@JsonProperty
 	protected String fieldClass = "class";
+	@JsonProperty
 	protected String fieldMethod = "method";
+	@JsonProperty
 	protected String fieldLine = "line";
 
 	protected void write(final LoggingEvent event, final JsonGenerator jsonGen)
@@ -156,6 +168,7 @@ public class LayoutJson extends Layout {
 
 	}
 
+	@JsonProperty
 	protected String fieldNDC = "ndc";
 
 	protected void writeNDC(final LoggingEvent event,
@@ -173,6 +186,7 @@ public class LayoutJson extends Layout {
 
 	}
 
+	@JsonProperty
 	protected String fieldStack = "stack";
 
 	protected void writeStack(final LoggingEvent event,
@@ -212,6 +226,7 @@ public class LayoutJson extends Layout {
 
 	}
 
+	@JsonProperty
 	protected String fieldMDC = "mdc";
 
 	protected void writeMDC(final LoggingEvent event,

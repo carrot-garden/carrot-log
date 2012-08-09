@@ -37,7 +37,7 @@ public class Main_03 {
 		final Logger logger = Logger.getRootLogger();
 		final Appender appender = logger.getAppender("SNS");
 
-		log.debug("appender \n" + appender);
+		log.info("appender \n" + appender);
 
 		log.debug("init");
 

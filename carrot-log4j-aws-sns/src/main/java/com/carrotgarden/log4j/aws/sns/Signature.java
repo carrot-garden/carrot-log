@@ -18,12 +18,12 @@ import org.apache.log4j.spi.LoggingEvent;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
- * event signature mask maker
+ * event signature mask and maker
  */
 public class Signature {
 
 	/**
-	 * include in event signature the following parts
+	 * include in the event signature the following parts
 	 */
 	public static enum Mask {
 
