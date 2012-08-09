@@ -28,13 +28,29 @@ import org.joda.time.DateTime;
  */
 public class LayoutJson extends Layout {
 
+	public static final String IGNORE = "ignore";
+
 	public static final int DEFAULT_STACK_DEPTH = 3;
+
+	//
 
 	protected int stackDepth = DEFAULT_STACK_DEPTH;
 
 	protected String[] mdcKeys = new String[0];
 
 	protected final JsonFactory jsonFactory = new JsonFactory();
+
+	protected boolean shouldInclude(final String fieldName) {
+		if (fieldName == null || fieldName.length() == 0) {
+			return false;
+		}
+		if (IGNORE.equalsIgnoreCase(fieldName)) {
+			return false;
+		}
+		return true;
+	}
+
+	//
 
 	protected String fieldError = "error";
 
@@ -88,28 +104,55 @@ public class LayoutJson extends Layout {
 	protected String fieldTime = "time";
 	protected String fieldThread = "thread";
 	protected String fieldMessage = "message";
-	protected String fieldLine = "line";
+	protected String fieldFile = "file";
+	protected String fieldClass = "class";
 	protected String fieldMethod = "method";
+	protected String fieldLine = "line";
 
 	protected void write(final LoggingEvent event, final JsonGenerator jsonGen)
 			throws Exception {
 
-		jsonGen.writeStringField(fieldLog, event.getLoggerName());
+		if (shouldInclude(fieldLog)) {
+			jsonGen.writeStringField(fieldLog, event.getLoggerName());
+		}
 
-		jsonGen.writeStringField(fieldLevel, event.getLevel().toString());
+		if (shouldInclude(fieldLevel)) {
+			jsonGen.writeStringField(fieldLevel, event.getLevel().toString());
+		}
 
-		jsonGen.writeStringField(fieldTime,
-				new DateTime(event.timeStamp).toString());
+		if (shouldInclude(fieldTime)) {
+			jsonGen.writeStringField(fieldTime,
+					new DateTime(event.timeStamp).toString());
+		}
 
-		jsonGen.writeStringField(fieldThread, event.getThreadName());
+		if (shouldInclude(fieldThread)) {
+			jsonGen.writeStringField(fieldThread, event.getThreadName());
+		}
 
-		jsonGen.writeStringField(fieldMessage, event.getMessage().toString());
+		if (shouldInclude(fieldMessage)) {
+			jsonGen.writeStringField(fieldMessage, event.getMessage()
+					.toString());
+		}
 
-		final LocationInfo location = event.getLocationInformation();
+		if (shouldInclude(fieldFile)) {
+			final LocationInfo location = event.getLocationInformation();
+			jsonGen.writeStringField(fieldFile, location.getFileName());
+		}
 
-		jsonGen.writeStringField(fieldLine, location.getLineNumber());
+		if (shouldInclude(fieldClass)) {
+			final LocationInfo location = event.getLocationInformation();
+			jsonGen.writeStringField(fieldClass, location.getClassName());
+		}
 
-		jsonGen.writeStringField(fieldMethod, location.getMethodName());
+		if (shouldInclude(fieldMethod)) {
+			final LocationInfo location = event.getLocationInformation();
+			jsonGen.writeStringField(fieldMethod, location.getMethodName());
+		}
+
+		if (shouldInclude(fieldLine)) {
+			final LocationInfo location = event.getLocationInformation();
+			jsonGen.writeStringField(fieldLine, location.getLineNumber());
+		}
 
 	}
 
@@ -117,6 +160,10 @@ public class LayoutJson extends Layout {
 
 	protected void writeNDC(final LoggingEvent event,
 			final JsonGenerator jsonGen) throws Exception {
+
+		if (!shouldInclude(fieldNDC)) {
+			return;
+		}
 
 		if (event.getNDC() != null) {
 
@@ -130,6 +177,10 @@ public class LayoutJson extends Layout {
 
 	protected void writeStack(final LoggingEvent event,
 			final JsonGenerator jsonGen) throws Exception {
+
+		if (!shouldInclude(fieldStack)) {
+			return;
+		}
 
 		final String[] stackArray = event.getThrowableStrRep();
 
@@ -165,6 +216,10 @@ public class LayoutJson extends Layout {
 
 	protected void writeMDC(final LoggingEvent event,
 			final JsonGenerator jsonGen) throws IOException {
+
+		if (!shouldInclude(fieldMDC)) {
+			return;
+		}
 
 		if (mdcKeys.length > 0) {
 
@@ -311,6 +366,22 @@ public class LayoutJson extends Layout {
 
 	public void setFieldMethod(final String fieldMethod) {
 		this.fieldMethod = fieldMethod;
+	}
+
+	public String getFieldFile() {
+		return fieldFile;
+	}
+
+	public void setFieldFile(final String fieldFile) {
+		this.fieldFile = fieldFile;
+	}
+
+	public String getFieldClass() {
+		return fieldClass;
+	}
+
+	public void setFieldClass(final String fieldClass) {
+		this.fieldClass = fieldClass;
 	}
 
 }

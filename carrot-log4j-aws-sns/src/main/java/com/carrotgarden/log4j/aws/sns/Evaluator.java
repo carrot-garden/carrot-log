@@ -17,6 +17,8 @@ public interface Evaluator extends TriggeringEventEvaluator {
 	boolean isTriggeringEvent(LoggingEvent event);
 
 	/** unique event key for event cache */
-	String getEventSignature(LoggingEvent event);
+	String makeEventSignature(LoggingEvent event);
+
+	void apply(String props);
 
 }

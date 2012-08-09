@@ -85,7 +85,7 @@ public class Appender extends AppenderSkeleton {
 	//
 
 	/**
-	 * topic ARN resolved from existing topic name
+	 * topic ARN resolved from existing amazon topic name
 	 * 
 	 * http://aws.amazon.com/sns/faqs/#10
 	 */
@@ -144,7 +144,8 @@ public class Appender extends AppenderSkeleton {
 		return amazonClient != null;
 	}
 
-	protected boolean ensureClientProps() {
+	/** provide amazon login credentials from file */
+	protected boolean ensureCredentials() {
 		if (hasCredentials()) {
 			final File file = new File(getCredentials());
 			if (file.exists() && file.isFile() && file.canRead()) {
@@ -152,21 +153,23 @@ public class Appender extends AppenderSkeleton {
 			}
 		}
 		LogLog.error("ivalid option", new IllegalArgumentException(
-				"clientProps"));
+				"Credentials"));
 		return false;
 	}
 
+	/** amazon topic name is required option */
 	protected boolean ensureTopicName() {
 		if (hasTopicName()) {
 			return true;
 		} else {
 			LogLog.error("ivalid option", new IllegalArgumentException(
-					"topicName"));
+					"TopicName"));
 			return false;
 		}
 	}
 
-	protected boolean ensureClient() {
+	/** instantiate amazon client */
+	protected boolean ensureAmazonClient() {
 
 		try {
 
@@ -180,7 +183,7 @@ public class Appender extends AppenderSkeleton {
 
 		} catch (final Exception e) {
 
-			LogLog.error("client init failure", e);
+			LogLog.error("amazon client init failure", e);
 
 			return false;
 
@@ -188,7 +191,8 @@ public class Appender extends AppenderSkeleton {
 
 	}
 
-	protected boolean ensureTopic() {
+	/** resolve topic ARN from topic name */
+	protected boolean ensureTopicARN() {
 
 		try {
 
@@ -215,7 +219,7 @@ public class Appender extends AppenderSkeleton {
 
 		} catch (final Exception e) {
 
-			LogLog.error("topic lookup failure", e);
+			LogLog.error("amazon topic lookup failure", e);
 
 			return false;
 
@@ -223,23 +227,20 @@ public class Appender extends AppenderSkeleton {
 
 	}
 
+	/** provide default throttling evaluator */
 	protected boolean ensureEvaluator() {
 
 		try {
 
-			final Evaluator defaultEvaluator;
-			if (hasEvaluatorProperties()) {
-				defaultEvaluator = new EvaluatorThrottler(
-						getEvaluatorProperties());
-			} else {
-				defaultEvaluator = new EvaluatorThrottler();
-			}
+			final Evaluator defaultEvaluator = new EvaluatorThrottler();
 
 			evaluator = (Evaluator) OptionConverter.instantiateByClassName( //
 					getEvaluatorClassName(), //
 					Evaluator.class, //
 					defaultEvaluator //
 					);
+
+			evaluator.apply(getEvaluatorProperties());
 
 			return true;
 
@@ -253,6 +254,7 @@ public class Appender extends AppenderSkeleton {
 
 	}
 
+	/** provide default JSON event layout renderer */
 	protected boolean ensureLayout() {
 
 		try {
@@ -273,6 +275,7 @@ public class Appender extends AppenderSkeleton {
 
 	}
 
+	/** provide AWS SNS thread pool */
 	protected boolean ensureService() {
 
 		try {
@@ -290,7 +293,7 @@ public class Appender extends AppenderSkeleton {
 
 		} catch (final Exception e) {
 
-			LogLog.error("failed to init service", e);
+			LogLog.warn("failed to init service; using default", e);
 
 			service = Executors.newCachedThreadPool();
 
@@ -307,10 +310,10 @@ public class Appender extends AppenderSkeleton {
 				&& ensureService() //
 				&& ensureLayout() //
 				&& ensureEvaluator() //
-				&& ensureClientProps() //
+				&& ensureCredentials() //
 				&& ensureTopicName() //
-				&& ensureClient() //
-				&& ensureTopic() //
+				&& ensureAmazonClient() //
+				&& ensureTopicARN() //
 		;
 
 		if (!isActivated()) {
@@ -320,12 +323,11 @@ public class Appender extends AppenderSkeleton {
 
 	}
 
+	/** try to flush last entry */
 	@Override
 	public synchronized void close() {
 
 		if (hasAmazonClient()) {
-
-			service.shutdown();
 
 			if (future != null) {
 				try {
@@ -334,6 +336,8 @@ public class Appender extends AppenderSkeleton {
 					LogLog.warn("some events might be lost on close", e);
 				}
 			}
+
+			service.shutdown();
 
 			amazonClient.shutdown();
 

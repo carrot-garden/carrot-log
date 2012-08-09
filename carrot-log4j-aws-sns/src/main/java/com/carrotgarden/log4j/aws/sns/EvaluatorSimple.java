@@ -21,9 +21,15 @@ public class EvaluatorSimple implements Evaluator {
 	}
 
 	@Override
-	public String getEventSignature(final LoggingEvent event) {
+	public String makeEventSignature(final LoggingEvent event) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void apply(final String props) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

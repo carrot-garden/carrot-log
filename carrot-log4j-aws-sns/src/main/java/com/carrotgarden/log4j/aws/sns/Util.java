@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.EnumSet;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.helpers.LogLog;
@@ -125,8 +126,8 @@ public class Util {
 
 	}
 
-	public static EnumSet<Mask> maskFrom(final Properties props,
-			final String key, final EnumSet<Mask> defVal) {
+	public static Set<Mask> maskFrom(final Properties props, final String key,
+			final Set<Mask> defVal) {
 
 		final String value = props.getProperty(key);
 

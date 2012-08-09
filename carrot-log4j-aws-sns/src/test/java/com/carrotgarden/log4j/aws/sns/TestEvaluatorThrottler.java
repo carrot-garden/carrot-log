@@ -9,8 +9,6 @@ package com.carrotgarden.log4j.aws.sns;
 
 import static org.junit.Assert.*;
 
-import java.util.concurrent.TimeUnit;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
@@ -33,8 +31,9 @@ public class TestEvaluatorThrottler {
 	@Test
 	public void testCacheEvition1() throws Exception {
 
-		final Evaluator evaluator = new EvaluatorThrottler(400,
-				TimeUnit.MILLISECONDS, Signature.DEFAULT);
+		final Evaluator evaluator = new EvaluatorThrottler();
+		evaluator
+				.apply(" period=400 \n unit=MILLISECONDS \n mask=LOGGER_NAME,LINE_NUMBER");
 
 		final Logger logger = Logger.getLogger(getClass());
 
@@ -56,8 +55,9 @@ public class TestEvaluatorThrottler {
 	@Test
 	public void testCacheEvition2() throws Exception {
 
-		final Evaluator evaluator = new EvaluatorThrottler(400,
-				TimeUnit.MILLISECONDS, Signature.DEFAULT);
+		final Evaluator evaluator = new EvaluatorThrottler();
+		evaluator
+				.apply(" period=400 \n unit=MILLISECONDS \n mask=LOGGER_NAME,LINE_NUMBER");
 
 		final Logger logger = Logger.getLogger(getClass());
 

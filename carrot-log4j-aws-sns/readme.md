@@ -26,26 +26,39 @@ all of these great projects lacked some features that we needed:
 
 so we made a new one:
 
-* comes as osgi bundle
+* comes as an osgi bundle
 
 * has configurable thread pool
 
 * uses json event layout by default
 
+* has configurable json event renderer 
+
 * has configurable topic and subject
 
-* uses event throttle based on silence period
+* uses event throttle based on write time eviction
 
-* uses decoupled dependencies (scope provided)
+* uses decoupled dependencies (maven scope provided)
 
 * reads amazon credentials from external file
 
 * does not try to create topics on demand (security requirement)
 
-* uses configurable event signature for event caching  
+* uses configurable event signature mask for event cache/throttle  
 
 ### release repo
 [maven central](http://search.maven.org/#search%7Cga%7C1%7Ccarrotgarden)
 
 ### snapshot repo
 [sonatype snapshots](https://oss.sonatype.org/content/repositories/snapshots/)
+
+### example log4j.properties
+
+```
+log4j.appender.SNS=com.carrotgarden.log4j.aws.sns.Appender
+log4j.appender.SNS.Threshold=INFO
+log4j.appender.SNS.TopicName=carrot-tester
+log4j.appender.SNS.TopicSubject=karaf.company.com
+log4j.appender.SNS.EvaluatorProperties= period=10 \n unit=SECONDS \n mask=LOGGER_NAME,LINE_NUMBER
+log4j.appender.SNS.Credentials=${user.home}/.amazon/carrotgarden/credentials/publish-sns.properties
+```

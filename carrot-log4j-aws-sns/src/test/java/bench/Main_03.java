@@ -37,9 +37,9 @@ public class Main_03 {
 		final Logger logger = Logger.getRootLogger();
 		final Appender appender = logger.getAppender("SNS");
 
-		// log.info("appender \n" + appender);
+		log.debug("appender \n" + appender);
 
-		// log.info("init");
+		log.debug("init");
 
 		/** only first invocation is published */
 		test();
@@ -49,10 +49,10 @@ public class Main_03 {
 		test();
 		test();
 
-		// log.info("done");
+		log.debug("done");
 
 		/** let AWS client finish event publish */
-		Thread.sleep(2 * 1000);
+		Thread.sleep(1 * 1000);
 
 	}
 
