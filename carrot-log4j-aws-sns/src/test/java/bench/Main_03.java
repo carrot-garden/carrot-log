@@ -17,6 +17,14 @@ public class Main_03 {
 
 	static Logger log = Logger.getLogger(Main_03.class);
 
+	static void test() {
+
+		log.fatal("amazon tester");
+		log.fatal("amazon tester");
+		log.fatal("amazon tester");
+
+	}
+
 	public static void main(final String[] args) throws Exception {
 
 		final Properties props = new Properties();
@@ -29,16 +37,22 @@ public class Main_03 {
 		final Logger logger = Logger.getRootLogger();
 		final Appender appender = logger.getAppender("SNS");
 
-		log.info("appender \n" + appender);
+		// log.info("appender \n" + appender);
 
-		log.info("init");
+		// log.info("init");
 
-		log.fatal("amazon tester");
+		/** only first invocation is published */
+		test();
+		test();
+		test();
+		test();
+		test();
+		test();
 
-		log.info("done");
+		// log.info("done");
 
 		/** let AWS client finish event publish */
-		Thread.sleep(1 * 1000);
+		Thread.sleep(2 * 1000);
 
 	}
 

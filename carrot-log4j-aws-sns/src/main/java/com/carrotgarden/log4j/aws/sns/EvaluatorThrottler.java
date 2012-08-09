@@ -154,7 +154,11 @@ public class EvaluatorThrottler implements Evaluator {
 			}
 		}
 
-		return text.toString();
+		final String value = text.toString();
+
+		// LogLog.error("value=" + value);
+
+		return value;
 
 	}
 
