@@ -34,6 +34,8 @@ import com.amazonaws.services.sns.model.PublishResult;
 import com.amazonaws.services.sns.model.Topic;
 
 /**
+ * AWS SNS appender
+ * 
  * original idea from
  * 
  * https://github.com/apetresc/amazon-sns-log4j-appender
@@ -83,7 +85,7 @@ public class Appender extends AppenderSkeleton {
 	//
 
 	/**
-	 * topic ARN resolved from existng topic name
+	 * topic ARN resolved from existing topic name
 	 * 
 	 * http://aws.amazon.com/sns/faqs/#10
 	 */
@@ -102,43 +104,43 @@ public class Appender extends AppenderSkeleton {
 
 	/** appender initialization status */
 	@JsonProperty
-	protected boolean isValid;
+	protected boolean isActivated;
 
 	//
 
-	protected boolean isValid() {
-		return isValid;
+	public boolean isActivated() {
+		return isActivated;
 	}
 
-	protected boolean isTriggering(final LoggingEvent event) {
-		return isValid && evaluator.isTriggeringEvent(event);
+	public boolean isTriggering(final LoggingEvent event) {
+		return isActivated && evaluator.isTriggeringEvent(event);
 	}
 
-	protected boolean hasCredentials() {
+	public boolean hasCredentials() {
 		return credentials != null;
 	}
 
-	protected boolean hasTopicName() {
+	public boolean hasTopicName() {
 		return topicName != null;
 	}
 
-	protected boolean hasSubject() {
+	public boolean hasTopicSubject() {
 		return topicSubject != null;
 	}
 
-	protected boolean hasLayout() {
+	public boolean hasLayout() {
 		return layout != null;
 	}
 
-	protected boolean hasTopicARN() {
+	public boolean hasTopicARN() {
 		return topicARN != null;
 	}
 
-	protected boolean hasEvaluatorProperties() {
+	public boolean hasEvaluatorProperties() {
 		return evaluatorProperties != null;
 	}
 
-	protected boolean hasAmazonClient() {
+	public boolean hasAmazonClient() {
 		return amazonClient != null;
 	}
 
@@ -301,7 +303,7 @@ public class Appender extends AppenderSkeleton {
 	@Override
 	public void activateOptions() {
 
-		isValid = true //
+		isActivated = true //
 				&& ensureService() //
 				&& ensureLayout() //
 				&& ensureEvaluator() //
@@ -311,7 +313,7 @@ public class Appender extends AppenderSkeleton {
 				&& ensureTopic() //
 		;
 
-		if (!isValid) {
+		if (!isActivated()) {
 			LogLog.error("appender is disabled due to invalid configration  : "
 					+ getClass().getName());
 		}
@@ -365,7 +367,7 @@ public class Appender extends AppenderSkeleton {
 
 		String subject;
 
-		if (hasSubject()) {
+		if (hasTopicSubject()) {
 			subject = getTopicSubject();
 			subject = Util.forceByteLimit(subject, Util.SUBJECT_LIMIT);
 		} else {
