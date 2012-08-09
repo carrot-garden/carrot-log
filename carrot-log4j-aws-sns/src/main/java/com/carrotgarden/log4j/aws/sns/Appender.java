@@ -104,7 +104,7 @@ public class Appender extends AppenderSkeleton {
 	/** AWS SNS client dedicated to the appender */
 	protected AmazonSNSAsync amazonClient;
 
-	/** evaluator configured for appender */
+	/** evaluator configured by this appender */
 	@JsonProperty
 	protected Evaluator evaluator;
 
@@ -152,26 +152,40 @@ public class Appender extends AppenderSkeleton {
 
 	/** provide amazon login credentials from file */
 	protected boolean ensureCredentials() {
+
 		if (hasCredentials()) {
+
 			final File file = new File(getCredentials());
+
 			if (file.exists() && file.isFile() && file.canRead()) {
 				return true;
 			}
+
 		}
+
 		LogLog.error("ivalid option", new IllegalArgumentException(
 				"Credentials"));
+
 		return false;
+
 	}
 
 	/** amazon topic name is required option */
 	protected boolean ensureTopicName() {
+
 		if (hasTopicName()) {
+
 			return true;
+
 		} else {
+
 			LogLog.error("ivalid option", new IllegalArgumentException(
 					"TopicName"));
+
 			return false;
+
 		}
+
 	}
 
 	/** instantiate amazon client */
@@ -351,6 +365,7 @@ public class Appender extends AppenderSkeleton {
 
 	}
 
+	/** will used json layout by default */
 	@Override
 	public boolean requiresLayout() {
 		return false;
@@ -388,6 +403,7 @@ public class Appender extends AppenderSkeleton {
 
 	}
 
+	/** last publish future */
 	protected Future<PublishResult> future;
 
 	protected void publish(final String message, final String subject) {
@@ -399,7 +415,9 @@ public class Appender extends AppenderSkeleton {
 			future = amazonClient.publishAsync(request);
 
 		} catch (final Exception e) {
+
 			LogLog.error("publish failure", e);
+
 		}
 	}
 
@@ -407,8 +425,8 @@ public class Appender extends AppenderSkeleton {
 		return credentials;
 	}
 
-	public void setCredentials(final String clientProps) {
-		this.credentials = clientProps;
+	public void setCredentials(final String credentials) {
+		this.credentials = credentials;
 	}
 
 	public String getTopicName() {
@@ -423,8 +441,8 @@ public class Appender extends AppenderSkeleton {
 		return topicSubject;
 	}
 
-	public void setTopicSubject(final String subject) {
-		this.topicSubject = subject;
+	public void setTopicSubject(final String topicSubject) {
+		this.topicSubject = topicSubject;
 	}
 
 	public String getEvaluatorClassName() {
@@ -475,22 +493,30 @@ public class Appender extends AppenderSkeleton {
 		this.poolMax = Util.getIntValue(poolMaxText, DEFAULT_POOL_MAX);
 	}
 
+	/** render as json; use only @JsonProperty annotated fields */
 	@Override
 	public String toString() {
 
-		final ObjectMapper mapper = new ObjectMapper();
-
-		mapper.configure(Feature.USE_ANNOTATIONS, true);
-		mapper.configure(Feature.AUTO_DETECT_FIELDS, false);
-		mapper.configure(Feature.AUTO_DETECT_GETTERS, false);
-		mapper.configure(Feature.AUTO_DETECT_IS_GETTERS, false);
-		mapper.configure(Feature.INDENT_OUTPUT, true);
-
 		try {
+
+			final ObjectMapper mapper = new ObjectMapper();
+
+			mapper.configure(Feature.INDENT_OUTPUT, true);
+
+			mapper.configure(Feature.USE_ANNOTATIONS, true);
+
+			mapper.configure(Feature.AUTO_DETECT_FIELDS, false);
+			mapper.configure(Feature.AUTO_DETECT_GETTERS, false);
+			mapper.configure(Feature.AUTO_DETECT_IS_GETTERS, false);
+
 			return mapper.writeValueAsString(this);
+
 		} catch (final Exception e) {
+
 			LogLog.error("", e);
+
 			return "{}";
+
 		}
 
 	}
