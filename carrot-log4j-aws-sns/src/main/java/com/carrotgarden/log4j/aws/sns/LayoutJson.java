@@ -12,6 +12,7 @@ import java.io.StringWriter;
 
 import org.apache.log4j.Layout;
 import org.apache.log4j.helpers.LogLog;
+import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -29,7 +30,7 @@ public class LayoutJson extends Layout {
 
 	public static final int DEFAULT_STACK_DEPTH = 3;
 
-	protected int stackDepth;
+	protected int stackDepth = DEFAULT_STACK_DEPTH;
 
 	protected String[] mdcKeys = new String[0];
 
@@ -87,6 +88,8 @@ public class LayoutJson extends Layout {
 	protected String fieldTime = "time";
 	protected String fieldThread = "thread";
 	protected String fieldMessage = "message";
+	protected String fieldLine = "line";
+	protected String fieldMethod = "method";
 
 	protected void write(final LoggingEvent event, final JsonGenerator jsonGen)
 			throws Exception {
@@ -101,6 +104,12 @@ public class LayoutJson extends Layout {
 		jsonGen.writeStringField(fieldThread, event.getThreadName());
 
 		jsonGen.writeStringField(fieldMessage, event.getMessage().toString());
+
+		final LocationInfo location = event.getLocationInformation();
+
+		jsonGen.writeStringField(fieldLine, location.getLineNumber());
+
+		jsonGen.writeStringField(fieldMethod, location.getMethodName());
 
 	}
 
@@ -136,15 +145,15 @@ public class LayoutJson extends Layout {
 
 		for (final String entry : stackArray) {
 
+			if (index > stackDepth) {
+				break;
+			}
+
 			jsonGen.writeStartObject();
 			jsonGen.writeStringField(Integer.toString(index), entry);
 			jsonGen.writeEndObject();
 
 			index++;
-
-			if (index > 3) {
-				break;
-			}
 
 		}
 
@@ -286,6 +295,22 @@ public class LayoutJson extends Layout {
 
 	public void setFieldError(final String fieldError) {
 		this.fieldError = fieldError;
+	}
+
+	public String getFieldLine() {
+		return fieldLine;
+	}
+
+	public void setFieldLine(final String fieldLine) {
+		this.fieldLine = fieldLine;
+	}
+
+	public String getFieldMethod() {
+		return fieldMethod;
+	}
+
+	public void setFieldMethod(final String fieldMethod) {
+		this.fieldMethod = fieldMethod;
 	}
 
 }
