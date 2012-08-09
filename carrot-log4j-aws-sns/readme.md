@@ -60,5 +60,5 @@ log4j.appender.SNS.Threshold=INFO
 log4j.appender.SNS.TopicName=carrot-tester
 log4j.appender.SNS.TopicSubject=karaf.company.com
 log4j.appender.SNS.EvaluatorProperties= period=10 \n unit=SECONDS \n mask=LOGGER_NAME,LINE_NUMBER
-log4j.appender.SNS.Credentials=${user.home}/.amazon/carrotgarden/credentials/publish-sns.properties
+log4j.appender.SNS.Credentials=${user.home}/publish-sns.properties
 ```
