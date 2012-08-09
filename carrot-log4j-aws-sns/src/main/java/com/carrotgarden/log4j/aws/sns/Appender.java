@@ -480,6 +480,7 @@ public class Appender extends AppenderSkeleton {
 
 		final ObjectMapper mapper = new ObjectMapper();
 
+		mapper.configure(Feature.USE_ANNOTATIONS, true);
 		mapper.configure(Feature.AUTO_DETECT_FIELDS, false);
 		mapper.configure(Feature.AUTO_DETECT_GETTERS, false);
 		mapper.configure(Feature.AUTO_DETECT_IS_GETTERS, false);
