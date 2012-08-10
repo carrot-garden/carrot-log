@@ -275,7 +275,7 @@ public class LayoutJson extends Layout {
 	}
 
 	public void setMdcKeys(final String mdcKeysText) {
-		if (mdcKeysText == null) {
+		if (mdcKeysText == null || mdcKeysText.length() == 0) {
 			mdcKeys = new String[0];
 		} else {
 			mdcKeys = mdcKeysText.split(",");
