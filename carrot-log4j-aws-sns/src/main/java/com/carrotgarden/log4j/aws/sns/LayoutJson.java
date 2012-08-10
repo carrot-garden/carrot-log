@@ -36,8 +36,10 @@ public class LayoutJson extends Layout {
 
 	//
 
+	/** stack depth reporting limit */
 	protected int stackDepth = DEFAULT_STACK_DEPTH;
 
+	/** list of MDC keys which should be reported */
 	protected String[] mdcKeys = new String[0];
 
 	protected final JsonFactory jsonFactory = new JsonFactory();
@@ -178,11 +180,13 @@ public class LayoutJson extends Layout {
 			return;
 		}
 
-		if (event.getNDC() != null) {
+		final String ndcText = event.getNDC();
 
-			jsonGen.writeStringField(fieldNDC, event.getNDC());
-
+		if (ndcText == null) {
+			return;
 		}
+
+		jsonGen.writeStringField(fieldNDC, ndcText);
 
 	}
 
@@ -236,25 +240,25 @@ public class LayoutJson extends Layout {
 			return;
 		}
 
-		if (mdcKeys.length > 0) {
+		if (mdcKeys.length == 0) {
+			return;
+		}
 
-			event.getMDCCopy();
+		event.getMDCCopy();
 
-			jsonGen.writeObjectFieldStart(fieldMDC);
+		jsonGen.writeObjectFieldStart(fieldMDC);
 
-			for (final String key : mdcKeys) {
+		for (final String key : mdcKeys) {
 
-				final Object mdc = event.getMDC(key);
+			final Object mdc = event.getMDC(key);
 
-				if (mdc != null) {
-					jsonGen.writeStringField(key, mdc.toString());
-				}
-
+			if (mdc != null) {
+				jsonGen.writeStringField(key, mdc.toString());
 			}
 
-			jsonGen.writeEndObject();
-
 		}
+
+		jsonGen.writeEndObject();
 
 	}
 
@@ -263,13 +267,17 @@ public class LayoutJson extends Layout {
 	}
 
 	public void setMdcKeys(final String[] mdcKeysArray) {
-		if (mdcKeysArray != null) {
+		if (mdcKeysArray == null) {
+			mdcKeys = new String[0];
+		} else {
 			mdcKeys = mdcKeysArray;
 		}
 	}
 
 	public void setMdcKeys(final String mdcKeysText) {
-		if (mdcKeysText != null && mdcKeysText.contains(",")) {
+		if (mdcKeysText == null) {
+			mdcKeys = new String[0];
+		} else {
 			mdcKeys = mdcKeysText.split(",");
 		}
 	}

@@ -23,7 +23,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class Signature {
 
 	/**
-	 * include in the event signature the following parts
+	 * event signature can include the following parts
 	 */
 	public static enum Mask {
 
@@ -75,42 +75,42 @@ public class Signature {
 		final StringBuilder text = new StringBuilder(128);
 
 		if (mask.contains(LEVEL)) {
-			text.append(event.getLevel().toString());
 			text.append("/");
+			text.append(event.getLevel().toString());
 		}
 
 		if (mask.contains(LOGGER_NAME)) {
-			text.append(event.getLoggerName());
 			text.append("/");
+			text.append(event.getLoggerName());
 		}
 
 		if (mask.contains(THREAD_NAME)) {
-			text.append(event.getThreadName());
 			text.append("/");
+			text.append(event.getThreadName());
 		}
 
 		if (mask.contains(FILE_NAME)) {
 			final LocationInfo location = event.getLocationInformation();
-			text.append(location.getFileName());
 			text.append("/");
+			text.append(location.getFileName());
 		}
 
 		if (mask.contains(CLASS_NAME)) {
 			final LocationInfo location = event.getLocationInformation();
-			text.append(location.getClassName());
 			text.append("/");
+			text.append(location.getClassName());
 		}
 
 		if (mask.contains(METHOD_NAME)) {
 			final LocationInfo location = event.getLocationInformation();
-			text.append(location.getMethodName());
 			text.append("/");
+			text.append(location.getMethodName());
 		}
 
 		if (mask.contains(LINE_NUMBER)) {
 			final LocationInfo location = event.getLocationInformation();
-			text.append(location.getLineNumber());
 			text.append("/");
+			text.append(location.getLineNumber());
 		}
 
 		if (mask.contains(STACK_TRACE)) {
