@@ -62,7 +62,7 @@ public class EvaluatorThrottler implements Evaluator {
 	}
 
 	@Override
-	public void apply(final String propsText) {
+	public void setProperties(final String propsText) {
 
 		if (propsText == null) {
 			return;
@@ -84,7 +84,7 @@ public class EvaluatorThrottler implements Evaluator {
 	@Override
 	public boolean isTriggeringEvent(final LoggingEvent event) {
 
-		final String key = makeEventSignature(event);
+		final String key = signature.make(event);
 
 		final boolean isNew = (eventCache.getIfPresent(key) == null);
 
@@ -101,14 +101,6 @@ public class EvaluatorThrottler implements Evaluator {
 			return false;
 
 		}
-
-	}
-
-	/** event signature based on event set mask */
-	@Override
-	public String makeEventSignature(final LoggingEvent event) {
-
-		return signature.make(event);
 
 	}
 

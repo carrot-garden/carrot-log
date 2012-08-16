@@ -33,7 +33,7 @@ public class TestEvaluatorThrottler {
 
 		final Evaluator evaluator = new EvaluatorThrottler();
 		evaluator
-				.apply(" period=400 \n unit=MILLISECONDS \n mask=LOGGER_NAME,LINE_NUMBER");
+				.setProperties(" period=400 \n unit=MILLISECONDS \n mask=LOGGER_NAME,LINE_NUMBER");
 
 		final Logger logger = Logger.getLogger(getClass());
 
@@ -57,7 +57,7 @@ public class TestEvaluatorThrottler {
 
 		final Evaluator evaluator = new EvaluatorThrottler();
 		evaluator
-				.apply(" period=400 \n unit=MILLISECONDS \n mask=LOGGER_NAME,LINE_NUMBER");
+				.setProperties(" period=400 \n unit=MILLISECONDS \n mask=LOGGER_NAME,LINE_NUMBER");
 
 		final Logger logger = Logger.getLogger(getClass());
 

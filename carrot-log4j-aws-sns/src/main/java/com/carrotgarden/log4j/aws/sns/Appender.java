@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Layout;
+import org.apache.log4j.PatternLayout;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.helpers.OptionConverter;
 import org.apache.log4j.spi.LoggingEvent;
@@ -51,44 +52,84 @@ public class Appender extends AppenderSkeleton {
 
 	//
 
-	/** log4j option; amazon credentials file; must exist */
+	/** log4j config option; amazon credentials file; must exist */
 	@JsonProperty
 	protected String credentials;
 
-	/** log4j option; SNS topic name; must exist */
+	/** log4j config option; SNS topic name; must exist */
 	@JsonProperty
 	protected String topicName;
 
-	/** log4j option; SNS topic subject; use for instance identity; optional */
+	/**
+	 * log4j config option; SNS topic subject; use for instance identity;
+	 * optional
+	 */
 	@JsonProperty
 	protected String topicSubject;
 
-	/** log4j option; evaluator class name; optional */
-	@JsonProperty
-	protected String evaluatorClassName;
-
-	/** log4j option; evaluator properties text; optional */
-	@JsonProperty
-	protected String evaluatorProperties;
-
-	/** log4j option; layout class name; optional */
-	@JsonProperty
-	protected String layoutClassName;
-
-	/** log4j option; minimum thread pool size; optional */
+	/** log4j config option; minimum thread pool size; optional */
 	@JsonProperty
 	protected int poolMin = DEFAULT_POOL_MIN;
 
-	/** log4j option; maximum thread pool size; optional */
+	/** log4j config option; maximum thread pool size; optional */
 	@JsonProperty
 	protected int poolMax = DEFAULT_POOL_MAX;
 
+	/** log4j config option; layout class name; optional */
 	@JsonProperty
 	public Layout getLaoyut() {
 		return super.getLayout();
 	}
 
+	/** render for {@link #toString()} */
+	@JsonProperty
+	public String getLayoutClassName() {
+		final Layout layout = getLayout();
+		return layout == null ? null : layout.getClass().getName();
+	}
+
+	/** log4j config option; layout class name; optional */
+	public void setLayoutClassName(final String layoutClassName) {
+
+		final Layout defaultLayout = new PatternLayout();
+
+		layout = (Layout) OptionConverter.instantiateByClassName( //
+				layoutClassName, //
+				Layout.class, //
+				defaultLayout //
+				);
+
+	}
+
+	/** render for {@link #toString()} */
+	@JsonProperty
+	public String getEvaluatorClassName() {
+		final Evaluator evaluator = getEvaluator();
+		return evaluator == null ? null : evaluator.getClass().getName();
+	}
+
+	/** log4j config option; evaluator class name; optional */
+	public void setEvaluatorClassName(final String evaluatorClassName) {
+
+		final Evaluator defaultEvaluator = new EvaluatorThrottler();
+
+		evaluator = (Evaluator) OptionConverter.instantiateByClassName( //
+				evaluatorClassName, //
+				Evaluator.class, //
+				defaultEvaluator //
+				);
+
+	}
+
+	/** evaluator configured for this appender */
+	@JsonProperty
+	protected String evaluatorProperties;
+
 	//
+
+	/** evaluator configured for this appender */
+	@JsonProperty
+	protected Evaluator evaluator;
 
 	/**
 	 * topic ARN resolved from existing amazon topic name
@@ -104,11 +145,7 @@ public class Appender extends AppenderSkeleton {
 	/** AWS SNS client dedicated to the appender */
 	protected AmazonSNSAsync amazonClient;
 
-	/** evaluator configured by this appender */
-	@JsonProperty
-	protected Evaluator evaluator;
-
-	/** appender initialization status */
+	/** appender activation status */
 	@JsonProperty
 	protected boolean isActivated;
 
@@ -134,16 +171,16 @@ public class Appender extends AppenderSkeleton {
 		return topicSubject != null;
 	}
 
+	public boolean hasEvaluator() {
+		return evaluator != null;
+	}
+
 	public boolean hasLayout() {
 		return layout != null;
 	}
 
 	public boolean hasTopicARN() {
 		return topicARN != null;
-	}
-
-	public boolean hasEvaluatorProperties() {
-		return evaluatorProperties != null;
 	}
 
 	public boolean hasAmazonClient() {
@@ -163,7 +200,7 @@ public class Appender extends AppenderSkeleton {
 
 		}
 
-		LogLog.error("ivalid option", new IllegalArgumentException(
+		LogLog.error("sns: ivalid option", new IllegalArgumentException(
 				"Credentials"));
 
 		return false;
@@ -179,7 +216,7 @@ public class Appender extends AppenderSkeleton {
 
 		} else {
 
-			LogLog.error("ivalid option", new IllegalArgumentException(
+			LogLog.error("sns: ivalid option", new IllegalArgumentException(
 					"TopicName"));
 
 			return false;
@@ -203,7 +240,7 @@ public class Appender extends AppenderSkeleton {
 
 		} catch (final Exception e) {
 
-			LogLog.error("amazon client init failure", e);
+			LogLog.error("sns: amazon client init failure", e);
 
 			return false;
 
@@ -232,14 +269,14 @@ public class Appender extends AppenderSkeleton {
 
 			}
 
-			LogLog.error("unknown topic name", new IllegalArgumentException(
-					getTopicName()));
+			LogLog.error("sns: unknown topic name",
+					new IllegalArgumentException(getTopicName()));
 
 			return false;
 
 		} catch (final Exception e) {
 
-			LogLog.error("amazon topic lookup failure", e);
+			LogLog.error("sns: amazon topic lookup failure", e);
 
 			return false;
 
@@ -252,21 +289,17 @@ public class Appender extends AppenderSkeleton {
 
 		try {
 
-			final Evaluator defaultEvaluator = new EvaluatorThrottler();
+			if (!hasEvaluator()) {
+				setEvaluator(new EvaluatorThrottler());
+			}
 
-			evaluator = (Evaluator) OptionConverter.instantiateByClassName( //
-					getEvaluatorClassName(), //
-					Evaluator.class, //
-					defaultEvaluator //
-					);
-
-			evaluator.apply(getEvaluatorProperties());
+			getEvaluator().setProperties(getEvaluatorProperties());
 
 			return true;
 
 		} catch (final Exception e) {
 
-			LogLog.error("evaluator init falure", e);
+			LogLog.error("sns: evaluator init falure", e);
 
 			return false;
 
@@ -280,14 +313,14 @@ public class Appender extends AppenderSkeleton {
 		try {
 
 			if (!hasLayout()) {
-				setLayout(new LayoutJson());
+				setLayout(new LayoutJSON());
 			}
 
 			return true;
 
 		} catch (final Exception e) {
 
-			LogLog.error("layout init failure", e);
+			LogLog.error("sns: layout init failure", e);
 
 			return false;
 
@@ -313,7 +346,7 @@ public class Appender extends AppenderSkeleton {
 
 		} catch (final Exception e) {
 
-			LogLog.warn("failed to init service; using default", e);
+			LogLog.warn("sns: failed to init service; using default", e);
 
 			service = Executors.newCachedThreadPool();
 
@@ -336,8 +369,11 @@ public class Appender extends AppenderSkeleton {
 				&& ensureTopicARN() //
 		;
 
+		LogLog.warn("sns: appender activate : " + getClass().getName() + "\n"
+				+ this);
+
 		if (!isActivated()) {
-			LogLog.error("appender is disabled due to invalid configration  : "
+			LogLog.error("sns: appender is disabled due to invalid configration  : "
 					+ getClass().getName());
 		}
 
@@ -353,7 +389,7 @@ public class Appender extends AppenderSkeleton {
 				try {
 					future.get(3, TimeUnit.SECONDS);
 				} catch (final Exception e) {
-					LogLog.warn("some events might be lost on close", e);
+					LogLog.warn("sns: some events might be lost on close", e);
 				}
 			}
 
@@ -368,7 +404,7 @@ public class Appender extends AppenderSkeleton {
 	/** will used json layout by default */
 	@Override
 	public boolean requiresLayout() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -416,7 +452,7 @@ public class Appender extends AppenderSkeleton {
 
 		} catch (final Exception e) {
 
-			LogLog.error("publish failure", e);
+			LogLog.error("sns: publish failure", e);
 
 		}
 	}
@@ -445,28 +481,12 @@ public class Appender extends AppenderSkeleton {
 		this.topicSubject = topicSubject;
 	}
 
-	public String getEvaluatorClassName() {
-		return evaluatorClassName;
+	public Evaluator getEvaluator() {
+		return evaluator;
 	}
 
-	public void setEvaluatorClassName(final String evaluatorClassName) {
-		this.evaluatorClassName = evaluatorClassName;
-	}
-
-	public String getLayoutClassName() {
-		return layoutClassName;
-	}
-
-	public void setLayoutClassName(final String layoutClassName) {
-		this.layoutClassName = layoutClassName;
-	}
-
-	public String getEvaluatorProperties() {
-		return evaluatorProperties;
-	}
-
-	public void setEvaluatorProperties(final String evaluatorParameters) {
-		this.evaluatorProperties = evaluatorParameters;
+	public void setEvaluator(final Evaluator evaluator) {
+		this.evaluator = evaluator;
 	}
 
 	public int getPoolMin() {
@@ -493,7 +513,15 @@ public class Appender extends AppenderSkeleton {
 		this.poolMax = Util.getIntValue(poolMaxText, DEFAULT_POOL_MAX);
 	}
 
-	/** render as json; use only @JsonProperty annotated fields */
+	public String getEvaluatorProperties() {
+		return evaluatorProperties;
+	}
+
+	public void setEvaluatorProperties(final String evaluatorProperties) {
+		this.evaluatorProperties = evaluatorProperties;
+	}
+
+	/** render as JSON; use only @JsonProperty annotated fields */
 	@Override
 	public String toString() {
 
@@ -509,11 +537,13 @@ public class Appender extends AppenderSkeleton {
 			mapper.configure(Feature.AUTO_DETECT_GETTERS, false);
 			mapper.configure(Feature.AUTO_DETECT_IS_GETTERS, false);
 
+			mapper.configure(Feature.FAIL_ON_EMPTY_BEANS, false);
+
 			return mapper.writeValueAsString(this);
 
 		} catch (final Exception e) {
 
-			LogLog.error("", e);
+			LogLog.error("sns: ", e);
 
 			return "{}";
 

@@ -28,7 +28,7 @@ import org.joda.time.DateTime;
  * 
  * TODO auto size limit
  */
-public class LayoutJson extends Layout {
+public class LayoutJSON extends Layout {
 
 	public static final String IGNORE = "ignore";
 
@@ -53,6 +53,11 @@ public class LayoutJson extends Layout {
 		}
 		return true;
 	}
+
+	//
+
+	@JsonProperty
+	protected String usePrettyPrinter = "false";
 
 	//
 
@@ -85,7 +90,7 @@ public class LayoutJson extends Layout {
 
 		} catch (final Exception e) {
 
-			LogLog.error("layout error", e);
+			LogLog.error("sns: layout error", e);
 
 			String errorMessage = e.toString();
 
@@ -100,12 +105,18 @@ public class LayoutJson extends Layout {
 	protected JsonGenerator createJsonGen(final StringWriter writer)
 			throws Exception {
 
-		return jsonFactory.createJsonGenerator(writer);
+		final JsonGenerator jsonGen = jsonFactory.createJsonGenerator(writer);
+
+		if ("true".equalsIgnoreCase(getUsePrettyPrinter())) {
+			jsonGen.useDefaultPrettyPrinter();
+		}
+
+		return jsonGen;
 
 	}
 
 	@JsonProperty
-	protected String fieldLog = "log";
+	protected String fieldLogger = "logger";
 	@JsonProperty
 	protected String fieldLevel = "level";
 	@JsonProperty
@@ -126,8 +137,8 @@ public class LayoutJson extends Layout {
 	protected void write(final LoggingEvent event, final JsonGenerator jsonGen)
 			throws Exception {
 
-		if (shouldInclude(fieldLog)) {
-			jsonGen.writeStringField(fieldLog, event.getLoggerName());
+		if (shouldInclude(fieldLogger)) {
+			jsonGen.writeStringField(fieldLogger, event.getLoggerName());
 		}
 
 		if (shouldInclude(fieldLevel)) {
@@ -303,12 +314,12 @@ public class LayoutJson extends Layout {
 		stackDepth = Util.getIntValue(stackDepthText, DEFAULT_STACK_DEPTH);
 	}
 
-	public String getFieldLog() {
-		return fieldLog;
+	public String getFieldLogger() {
+		return fieldLogger;
 	}
 
-	public void setFieldLog(final String fieldLog) {
-		this.fieldLog = fieldLog;
+	public void setFieldLogger(final String fieldLog) {
+		this.fieldLogger = fieldLog;
 	}
 
 	public String getFieldLevel() {
@@ -405,6 +416,14 @@ public class LayoutJson extends Layout {
 
 	public void setFieldClass(final String fieldClass) {
 		this.fieldClass = fieldClass;
+	}
+
+	public String getUsePrettyPrinter() {
+		return usePrettyPrinter;
+	}
+
+	public void setUsePrettyPrinter(final String usePrettyPrinter) {
+		this.usePrettyPrinter = usePrettyPrinter;
 	}
 
 }

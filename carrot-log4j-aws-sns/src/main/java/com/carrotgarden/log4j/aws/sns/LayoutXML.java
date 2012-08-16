@@ -7,23 +7,28 @@
  */
 package com.carrotgarden.log4j.aws.sns;
 
+import org.apache.log4j.Layout;
 import org.apache.log4j.spi.LoggingEvent;
 
-/**
- * TODO
- */
-public class EvaluatorSimple implements Evaluator {
+/** TODO */
+public class LayoutXML extends Layout {
 
 	@Override
-	public boolean isTriggeringEvent(final LoggingEvent event) {
+	public void activateOptions() {
 		// TODO Auto-generated method stub
-		return false;
+
 	}
 
 	@Override
-	public void setProperties(final String props) {
+	public String format(final LoggingEvent event) {
 		// TODO Auto-generated method stub
+		return null;
+	}
 
+	@Override
+	public boolean ignoresThrowable() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

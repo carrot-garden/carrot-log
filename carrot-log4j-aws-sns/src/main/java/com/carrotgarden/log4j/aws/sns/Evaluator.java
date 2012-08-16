@@ -16,10 +16,7 @@ public interface Evaluator extends TriggeringEventEvaluator {
 	@Override
 	boolean isTriggeringEvent(LoggingEvent event);
 
-	/** make unique event key for the event cache */
-	String makeEventSignature(LoggingEvent event);
-
-	/** change evaluator configuration via key=value properties text */
-	void apply(String propsText);
+	/** evaluator configuration via key=value properties text */
+	void setProperties(String propsText);
 
 }

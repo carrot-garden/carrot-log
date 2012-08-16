@@ -31,9 +31,9 @@ import com.google.common.base.Joiner;
  * 
  * https://github.com/Aconex/json-log4j-layout
  */
-public class TestLayoutJson {
+public class TestLayoutJSON {
 
-	private static final Logger log = Logger.getLogger(TestLayoutJson.class);
+	private static final Logger log = Logger.getLogger(TestLayoutJSON.class);
 
 	@Before
 	public void setUp() throws Exception {
@@ -43,12 +43,12 @@ public class TestLayoutJson {
 	public void tearDown() throws Exception {
 	}
 
-	private LayoutJson jsonLayout;
+	private LayoutJSON jsonLayout;
 
 	@Before
 	public void setup() {
 
-		jsonLayout = new LayoutJson();
+		jsonLayout = new LayoutJSON();
 
 		jsonLayout.activateOptions();
 
@@ -177,7 +177,7 @@ public class TestLayoutJson {
 	private void validateLogger(final String output, final LoggingEvent event) {
 		if (event.getLogger() != null) {
 
-			final String partial = "\"" + jsonLayout.fieldLog + "\":\""
+			final String partial = "\"" + jsonLayout.fieldLogger + "\":\""
 					+ event.getLoggerName() + "\"";
 
 			assertTrue(output.contains(partial));

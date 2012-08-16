@@ -11,14 +11,14 @@
 	</parent>
 
 	<groupId>com.carrotgarden.log</groupId>
-	<artifactId>carrot-log4j</artifactId>
+	<artifactId>carrot-log</artifactId>
 	<version>1.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<scm>
-		<url>https://github.com/carrot-garden/carrot-log4j</url>
-		<connection>scm:git:git://github.com/carrot-garden/carrot-log4j.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/carrot-garden/carrot-log4j.git</developerConnection>
+		<url>https://github.com/carrot-garden/carrot-log</url>
+		<connection>scm:git:git://github.com/carrot-garden/carrot-log.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/carrot-garden/carrot-log.git</developerConnection>
 	</scm>
 
 	<properties>
