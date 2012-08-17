@@ -13,7 +13,7 @@
 
 	<groupId>com.carrotgarden.log</groupId>
 	<artifactId>carrot-log4j-aws-sns</artifactId>
-	<version>1.0.4-SNAPSHOT</version>
+	<version>1.0.4</version>
 	<packaging>bundle</packaging>
 
 	<description>log4j appender for amazon sns</description>
@@ -22,7 +22,7 @@
 		<url>https://github.com/carrot-garden/carrot-log</url>
 		<connection>scm:git:git://github.com/carrot-garden/carrot-log.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/carrot-garden/carrot-log.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>carrot-log4j-aws-sns-1.0.4</tag>
 	</scm>
 
 	<properties>
