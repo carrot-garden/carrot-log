@@ -146,16 +146,19 @@
 	<build>
 
 		<plugins>
+
+			<!-- start before pax logging -->
+
 			<plugin>
 				<groupId>org.apache.karaf.tooling</groupId>
 				<artifactId>karaf-maven-plugin</artifactId>
 				<version>3.0.0-SNAPSHOT</version>
 				<extensions>true</extensions>
 				<configuration>
-					<!-- start before pax logging -->
 					<startLevel>7</startLevel>
 				</configuration>
 			</plugin>
+
 		</plugins>
 
 		<pluginManagement>
