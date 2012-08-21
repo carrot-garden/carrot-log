@@ -1,0 +1,15 @@
+{
+  "Statement": [
+    {
+      "Sid": "20120801",
+      "Action": [
+        "sns:ListTopics",
+        "sns:Publish"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:sns:*:*:*"
+      ]
+    }
+  ]
+}
