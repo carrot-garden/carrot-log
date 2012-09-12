@@ -377,7 +377,7 @@ public class Appender extends AppenderSkeleton {
 
 	}
 
-	/** try to flush last entry */
+	/**  */
 	@Override
 	public synchronized void close() {
 
