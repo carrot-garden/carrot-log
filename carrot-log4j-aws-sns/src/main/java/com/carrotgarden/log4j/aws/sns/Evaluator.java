@@ -10,7 +10,7 @@ package com.carrotgarden.log4j.aws.sns;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.TriggeringEventEvaluator;
 
-/** provide signature and accept configuration */
+/** accept configuration properties */
 public interface Evaluator extends TriggeringEventEvaluator {
 
 	@Override

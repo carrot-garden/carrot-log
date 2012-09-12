@@ -19,9 +19,9 @@ public class Main_03 {
 
 	static void test() {
 
-		log.fatal("amazon tester");
-		log.fatal("amazon tester");
-		log.fatal("amazon tester");
+		log.info("amazon tester 1 ");
+		log.warn("amazon tester 2");
+		log.error("amazon tester 3");
 
 	}
 
@@ -37,10 +37,6 @@ public class Main_03 {
 		final Logger logger = Logger.getRootLogger();
 		final Appender appender = logger.getAppender("SNS");
 
-		log.info("appender \n" + appender);
-
-		log.debug("init");
-
 		/** only first invocation is published */
 		test();
 		test();
@@ -49,10 +45,14 @@ public class Main_03 {
 		test();
 		test();
 
-		log.debug("done");
+		// log.info("appender \n" + appender);
 
 		/** let AWS client finish event publish */
 		Thread.sleep(1 * 1000);
+
+		appender.close();
+
+		log.debug("test");
 
 	}
 

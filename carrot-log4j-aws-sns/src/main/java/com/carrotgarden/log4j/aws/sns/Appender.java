@@ -11,7 +11,6 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +31,6 @@ import com.amazonaws.services.sns.AmazonSNSAsync;
 import com.amazonaws.services.sns.AmazonSNSAsyncClient;
 import com.amazonaws.services.sns.model.ListTopicsResult;
 import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sns.model.PublishResult;
 import com.amazonaws.services.sns.model.Topic;
 
 /**
@@ -147,7 +145,7 @@ public class Appender extends AppenderSkeleton {
 
 	/** appender activation status */
 	@JsonProperty
-	protected boolean isActivated;
+	protected volatile boolean isActivated;
 
 	//
 
@@ -357,7 +355,7 @@ public class Appender extends AppenderSkeleton {
 	}
 
 	@Override
-	public void activateOptions() {
+	public synchronized void activateOptions() {
 
 		isActivated = true //
 				&& ensureService() //
@@ -383,19 +381,15 @@ public class Appender extends AppenderSkeleton {
 	@Override
 	public synchronized void close() {
 
+		isActivated = false;
+
 		if (hasAmazonClient()) {
 
-			if (future != null) {
-				try {
-					future.get(3, TimeUnit.SECONDS);
-				} catch (final Exception e) {
-					LogLog.warn("sns: some events might be lost on close", e);
-				}
-			}
-
 			service.shutdown();
+			service = null;
 
 			amazonClient.shutdown();
+			amazonClient = null;
 
 		}
 
@@ -410,11 +404,13 @@ public class Appender extends AppenderSkeleton {
 	@Override
 	public void append(final LoggingEvent event) {
 
+		// LogLog.warn("event=" + event.getMessage());
+
 		if (!isTriggering(event)) {
 			return;
 		}
 
-		// LogLog.error("event=" + event.getLoggerName());
+		// LogLog.warn("event=" + event.getLoggerName());
 
 		String message;
 
@@ -439,16 +435,13 @@ public class Appender extends AppenderSkeleton {
 
 	}
 
-	/** last publish future */
-	protected Future<PublishResult> future;
-
 	protected void publish(final String message, final String subject) {
 		try {
 
 			final PublishRequest request = new PublishRequest(//
 					topicARN, message, subject);
 
-			future = amazonClient.publishAsync(request);
+			amazonClient.publishAsync(request);
 
 		} catch (final Exception e) {
 
