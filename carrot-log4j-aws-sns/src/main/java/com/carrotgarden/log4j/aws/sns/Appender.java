@@ -358,12 +358,12 @@ public class Appender extends AppenderSkeleton {
 	public synchronized void activateOptions() {
 
 		isActivated = true //
-				&& ensureService() //
 				&& ensureLayout() //
 				&& ensureEvaluator() //
+				&& ensureService() //
 				&& ensureCredentials() //
-				&& ensureTopicName() //
 				&& ensureAmazonClient() //
+				&& ensureTopicName() //
 				&& ensureTopicARN() //
 		;
 

@@ -14,7 +14,7 @@
 
 	<groupId>com.carrotgarden.log</groupId>
 	<artifactId>carrot-log4j-aws-sns-pax-kar</artifactId>
-	<version>1.0.8-SNAPSHOT</version>
+	<version>1.0.9-SNAPSHOT</version>
 	<packaging>feature</packaging>
 
 	<description>log4j appender for amazon sns; packaged as karaf startup feature</description>
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>com.carrotgarden.log</groupId>
 			<artifactId>carrot-log4j-aws-sns-pax</artifactId>
-			<version>1.0.8</version>
+			<version>1.0.9-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
