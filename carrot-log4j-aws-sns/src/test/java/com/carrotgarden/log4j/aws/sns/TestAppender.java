@@ -70,7 +70,7 @@ public class TestAppender {
 		appender.topicName = "test";
 		appender.topicARN = topicArn;
 		appender.amazonClient = amazonClient;
-		appender.isActivated = true;
+		appender.isActive = true;
 		appender.topicSubject = SUBJECT;
 
 		appender.ensureLayout();

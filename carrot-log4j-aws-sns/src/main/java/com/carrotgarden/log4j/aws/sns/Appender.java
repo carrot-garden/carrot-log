@@ -145,16 +145,16 @@ public class Appender extends AppenderSkeleton {
 
 	/** appender activation status */
 	@JsonProperty
-	protected volatile boolean isActivated;
+	protected volatile boolean isActive;
 
 	//
 
-	public boolean isActivated() {
-		return isActivated;
+	public boolean isActive() {
+		return isActive;
 	}
 
 	public boolean isTriggering(final LoggingEvent event) {
-		return isActivated && evaluator.isTriggeringEvent(event);
+		return isActive && evaluator.isTriggeringEvent(event);
 	}
 
 	public boolean hasCredentials() {
@@ -357,7 +357,7 @@ public class Appender extends AppenderSkeleton {
 	@Override
 	public synchronized void activateOptions() {
 
-		isActivated = true //
+		isActive = true //
 				&& ensureLayout() //
 				&& ensureEvaluator() //
 				&& ensureService() //
@@ -370,7 +370,7 @@ public class Appender extends AppenderSkeleton {
 		LogLog.warn("sns: appender activate : " + getClass().getName() + "\n"
 				+ this);
 
-		if (!isActivated()) {
+		if (!isActive()) {
 			LogLog.error("sns: appender is disabled due to invalid configration  : "
 					+ getClass().getName());
 		}
@@ -381,7 +381,9 @@ public class Appender extends AppenderSkeleton {
 	@Override
 	public synchronized void close() {
 
-		isActivated = false;
+		isActive = false;
+
+		LogLog.warn("sns: appender deactivate : " + getClass().getName());
 
 		if (hasAmazonClient()) {
 
