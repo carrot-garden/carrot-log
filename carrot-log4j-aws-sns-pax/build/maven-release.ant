@@ -9,16 +9,15 @@
 -->
 <project default="maven" basedir="./..">
 
+	<echo message="basedir : ${basedir}" />
+
 	<target name="maven">
 
-		<echo message="basedir : ${basedir}" />
-
-		<!-- note: mvn executable must be present on o/s path -->
-		<condition property="executable" value="mvn.bat">
-			<os family="windows" />
-		</condition>
 		<condition property="executable" value="mvn">
 			<os family="unix" />
+		</condition>
+		<condition property="executable" value="mvn.bat">
+			<os family="windows" />
 		</condition>
 
 		<exec executable="${executable}">
@@ -26,7 +25,10 @@
 			<arg value="release:clean" />
 			<arg value="release:prepare" />
 			<arg value="release:perform" />
-			
+
+			<arg value="--define" />
+			<arg value="localCheckout=true" />
+
 		</exec>
 
 	</target>
