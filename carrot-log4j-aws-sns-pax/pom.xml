@@ -20,7 +20,7 @@
 
 	<groupId>com.carrotgarden.log</groupId>
 	<artifactId>carrot-log4j-aws-sns-pax</artifactId>
-	<version>1.0.11</version>
+	<version>1.0.12-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<description>log4j appender for amazon sns; packaged as pax logging fragment</description>
@@ -29,7 +29,7 @@
 		<url>https://github.com/carrot-garden/carrot-log</url>
 		<connection>scm:git:git://github.com/carrot-garden/carrot-log.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/carrot-garden/carrot-log.git</developerConnection>
-		<tag>carrot-log4j-aws-sns-pax-1.0.11</tag>
+		<tag>carrot-log4j-aws-sns-pax-1.0.10</tag>
 	</scm>
 
 	<properties>
