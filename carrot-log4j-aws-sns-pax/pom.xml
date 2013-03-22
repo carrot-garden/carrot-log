@@ -22,7 +22,7 @@
 		<url>https://github.com/carrot-garden/carrot-log</url>
 		<connection>scm:git:git://github.com/carrot-garden/carrot-log.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/carrot-garden/carrot-log.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>master</tag>
 	</scm>
 
 	<properties>
