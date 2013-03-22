@@ -1,13 +1,7 @@
-<!--
-
-    Copyright (C) 2010-2013 Andrei Pozolotin <Andrei.Pozolotin@gmail.com>
-
-    All rights reserved. Licensed under the OSI BSD License.
-
-    http://www.opensource.org/licenses/bsd-license.php
-
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<!-- Copyright (C) 2010-2013 Andrei Pozolotin <Andrei.Pozolotin@gmail.com> 
+	All rights reserved. Licensed under the OSI BSD License. http://www.opensource.org/licenses/bsd-license.php -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -20,7 +14,7 @@
 
 	<groupId>com.carrotgarden.log</groupId>
 	<artifactId>carrot-log4j-aws-sns-pax-kar</artifactId>
-	<version>1.0.11-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<packaging>feature</packaging>
 
 	<description>log4j appender for amazon sns; packaged as karaf startup feature</description>
@@ -45,7 +39,7 @@
 		<dependency>
 			<groupId>com.carrotgarden.log</groupId>
 			<artifactId>carrot-log4j-aws-sns-pax</artifactId>
-			<version>1.0.11</version>
+			<version>1.1.0</version>
 		</dependency>
 
 		<dependency>
@@ -108,54 +102,47 @@
 
 	</dependencies>
 
-	<!-- <repositories> -->
-	<!-- <repository> -->
-	<!-- <id>com.springsource.repository.bundles.release</id> -->
-	<!-- <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle 
-		Releases</name> -->
-	<!-- <url>http://repository.springsource.com/maven/bundles/release</url> -->
-	<!-- </repository> -->
-	<!-- <repository> -->
-	<!-- <id>com.springsource.repository.bundles.external</id> -->
-	<!-- <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name> -->
-	<!-- <url>http://repository.springsource.com/maven/bundles/external</url> -->
-	<!-- </repository> -->
-	<!-- <repository> -->
-	<!-- <id>apache</id> -->
-	<!-- <url>https://repository.apache.org/content/groups/public/</url> -->
-	<!-- <releases> -->
-	<!-- <enabled>true</enabled> -->
-	<!-- </releases> -->
-	<!-- <snapshots> -->
-	<!-- <enabled>true</enabled> -->
-	<!-- </snapshots> -->
-	<!-- </repository> -->
-	<!-- </repositories> -->
+	<repositories>
+		<repository>
+			<id>com.springsource.repository.bundles.release</id>
+			<name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/release</url>
+		</repository>
+		<repository>
+			<id>com.springsource.repository.bundles.external</id>
+			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/external</url>
+		</repository>
+		<repository>
+			<id>apache</id>
+			<url>https://repository.apache.org/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
-	<!-- <pluginRepositories> -->
-	<!-- <pluginRepository> -->
-	<!-- <id>apache</id> -->
-	<!-- <url>https://repository.apache.org/content/groups/public/</url> -->
-	<!-- <releases> -->
-	<!-- <enabled>true</enabled> -->
-	<!-- </releases> -->
-	<!-- <snapshots> -->
-	<!-- <enabled>true</enabled> -->
-	<!-- </snapshots> -->
-	<!-- </pluginRepository> -->
-	<!-- </pluginRepositories> -->
+	<pluginRepositories>
+		<pluginRepository>
+			<id>apache</id>
+			<url>https://repository.apache.org/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
 
 	<build>
 
 		<plugins>
 
-			<plugin>
-				<groupId>com.carrotgarden.maven</groupId>
-				<artifactId>carrot-maven-scr-plugin</artifactId>
-				<version>2.0.1</version>
-			</plugin>
-
-			<!-- start before pax logging -->
+			<!-- Start level: before pax logging. -->
 			<plugin>
 				<groupId>org.apache.karaf.tooling</groupId>
 				<artifactId>karaf-maven-plugin</artifactId>
