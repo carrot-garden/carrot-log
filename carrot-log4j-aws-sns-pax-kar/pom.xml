@@ -27,7 +27,7 @@
 
 	<properties>
 
-		<carrotJavaVersion>1.6</carrotJavaVersion>
+		<projectJavaVersion>1.6</projectJavaVersion>
 
 	</properties>
 
