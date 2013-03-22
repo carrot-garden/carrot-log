@@ -150,8 +150,13 @@
 
 		<plugins>
 
-			<!-- start before pax logging -->
+			<plugin>
+				<groupId>com.carrotgarden.maven</groupId>
+				<artifactId>carrot-maven-scr-plugin</artifactId>
+				<version>2.0.1</version>
+			</plugin>
 
+			<!-- start before pax logging -->
 			<plugin>
 				<groupId>org.apache.karaf.tooling</groupId>
 				<artifactId>karaf-maven-plugin</artifactId>
