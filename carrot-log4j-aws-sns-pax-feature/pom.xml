@@ -32,33 +32,19 @@
 
 	</properties>
 
+	<!-- Used for startup.properties, keep in order. -->
 	<dependencies>
 
-		<!-- MAIN -->
-
-		<!-- Fragment logger bundle. -->
+		<!-- AWS SDK required json codec. -->
 		<dependency>
-			<groupId>com.carrotgarden.log</groupId>
-			<artifactId>carrot-log4j-aws-sns-pax</artifactId>
-			<version>1.1.2</version>
-		</dependency>
-		
-		<!-- Fragment logger required dependencies. -->
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>14.0.1</version>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+			<version>1.9.9</version>
 		</dependency>
 		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-		</dependency>
-
-		<!-- AWS SDK converted to bundle. -->
-		<dependency>
-			<groupId>com.carrotgarden.wrap</groupId>
-			<artifactId>carrot-wrap-aws-java-sdk</artifactId>
-			<version>1.4.1-build001</version>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.9.9</version>
 		</dependency>
 
 		<!-- AWS SDK required apache client. -->
@@ -78,36 +64,29 @@
 			<version>4.1.1</version>
 		</dependency>
 
-		<!-- AWS SDK required json codec. -->
+		<!-- AWS SDK converted to bundle. -->
 		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-core-asl</artifactId>
-			<version>1.9.9</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.9.9</version>
+			<groupId>com.carrotgarden.wrap</groupId>
+			<artifactId>carrot-wrap-aws-java-sdk</artifactId>
+			<version>1.4.1-build001</version>
 		</dependency>
 
-		<!-- TEST -->
-
+		<!-- Logger dependencies. -->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>14.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
 		</dependency>
 
+		<!-- Fragment logger bundle. -->
 		<dependency>
-			<groupId>org.easymock</groupId>
-			<artifactId>easymock</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<scope>test</scope>
+			<groupId>com.carrotgarden.log</groupId>
+			<artifactId>carrot-log4j-aws-sns-pax</artifactId>
+			<version>1.1.2</version>
 		</dependency>
 
 	</dependencies>
@@ -159,6 +138,7 @@
 				<version>3.0.0.RC1</version>
 				<extensions>true</extensions>
 				<configuration>
+					<!-- Install before pax-logging. -->
 					<startLevel>7</startLevel>
 				</configuration>
 			</plugin>
