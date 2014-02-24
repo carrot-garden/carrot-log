@@ -7,17 +7,20 @@
  */
 package com.carrotgarden.log4j.aws.sns;
 
-import java.io.File;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.PropertiesCredentials;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.RegionUtils;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.sns.AmazonSNSAsync;
+import com.amazonaws.services.sns.AmazonSNSAsyncClient;
+import com.amazonaws.services.sns.model.ListTopicsResult;
+import com.amazonaws.services.sns.model.PublishRequest;
+import com.amazonaws.services.sns.model.Topic;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Layout;
 import org.apache.log4j.PatternLayout;
+import org.apache.log4j.helpers.Loader;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.helpers.OptionConverter;
 import org.apache.log4j.spi.LoggingEvent;
@@ -25,13 +28,13 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.PropertiesCredentials;
-import com.amazonaws.services.sns.AmazonSNSAsync;
-import com.amazonaws.services.sns.AmazonSNSAsyncClient;
-import com.amazonaws.services.sns.model.ListTopicsResult;
-import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sns.model.Topic;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * AWS SNS appender
@@ -47,10 +50,11 @@ public class Appender extends AppenderSkeleton {
 
 	public static final int DEFAULT_POOL_MIN = 0;
 	public static final int DEFAULT_POOL_MAX = 10;
+    public static final String DEFAULT_AWS_REGION_NAME = Regions.US_EAST_1.getName();
 
 	//
 
-	/** log4j config option; amazon credentials file; must exist */
+	/** log4j config option; amazon credentials URL or file; must exist */
 	@JsonProperty
 	protected String credentials;
 
@@ -65,7 +69,14 @@ public class Appender extends AppenderSkeleton {
 	@JsonProperty
 	protected String topicSubject;
 
-	/** log4j config option; minimum thread pool size; optional */
+    /**
+     * log4j config option; AWS region for SNS topic; optional
+     * optional
+     */
+    @JsonProperty
+    protected String regionName = DEFAULT_AWS_REGION_NAME;
+
+    /** log4j config option; minimum thread pool size; optional */
 	@JsonProperty
 	protected int poolMin = DEFAULT_POOL_MIN;
 
@@ -75,7 +86,7 @@ public class Appender extends AppenderSkeleton {
 
 	/** log4j config option; layout class name; optional */
 	@JsonProperty
-	public Layout getLaoyut() {
+	public Layout getLayout() {
 		return super.getLayout();
 	}
 
@@ -143,7 +154,12 @@ public class Appender extends AppenderSkeleton {
 	/** AWS SNS client dedicated to the appender */
 	protected AmazonSNSAsync amazonClient;
 
-	/** appender activation status */
+    protected PropertiesCredentials amazonCredentials;
+
+    /** AWS SNS region */
+    protected Region awsSnsRegion;
+
+    /** appender activation status */
 	@JsonProperty
 	protected volatile boolean isActive;
 
@@ -188,18 +204,35 @@ public class Appender extends AppenderSkeleton {
 	/** provide amazon login credentials from file */
 	protected boolean ensureCredentials() {
 
-		if (hasCredentials()) {
+        if (hasCredentials()) {
+            // Try to get URL and open stream
+            // Any exception, try as file
+            URL url = null;
+            try {
+                url = new URL(getCredentials());
+            } catch (MalformedURLException murle) {
+                url = Loader.getResource(getCredentials());
+            }
 
-			final File file = new File(getCredentials());
-
-			if (file.exists() && file.isFile() && file.canRead()) {
-				return true;
-			}
-
+            if (url != null) {
+                try {
+                    amazonCredentials = new PropertiesCredentials(url.openStream());
+                    return true;
+                } catch (Exception e) {
+                    // fail out
+                }
+            } else {
+                try {
+                    amazonCredentials = new PropertiesCredentials(new File(getCredentials()));
+                    return true;
+                } catch (Exception e2) {
+                    // fail out
+                }
+            }
 		}
 
-		LogLog.error("sns: ivalid option", new IllegalArgumentException(
-				"Credentials"));
+		LogLog.error("sns: invalid option", new IllegalArgumentException(
+				getCredentials() + " for Credentials"));
 
 		return false;
 
@@ -223,16 +256,12 @@ public class Appender extends AppenderSkeleton {
 
 	}
 
-	/** instantiate amazon client */
+    /** instantiate amazon client */
 	protected boolean ensureAmazonClient() {
 
 		try {
 
-			final File file = new File(getCredentials());
-
-			final AWSCredentials creds = new PropertiesCredentials(file);
-
-			amazonClient = new AmazonSNSAsyncClient(creds, service);
+			amazonClient = new AmazonSNSAsyncClient(amazonCredentials, service);
 
 			return true;
 
@@ -246,7 +275,27 @@ public class Appender extends AppenderSkeleton {
 
 	}
 
-	/** resolve topic ARN from topic name */
+    /** instantiate amazon region */
+    protected boolean ensureAmazonRegion() {
+
+        try {
+            awsSnsRegion = RegionUtils.getRegion(regionName);
+
+            amazonClient.setRegion(awsSnsRegion);
+
+            return true;
+
+        } catch (final Exception e) {
+
+            LogLog.error("sns: amazon region init failure", e);
+
+            return false;
+
+        }
+
+    }
+
+    /** resolve topic ARN from topic name */
 	protected boolean ensureTopicARN() {
 
 		try {
@@ -357,12 +406,12 @@ public class Appender extends AppenderSkeleton {
 	@Override
 	public synchronized void activateOptions() {
 
-		isActive = true //
-				&& ensureLayout() //
+		isActive = ensureLayout() //
 				&& ensureEvaluator() //
 				&& ensureService() //
 				&& ensureCredentials() //
 				&& ensureAmazonClient() //
+                && ensureAmazonRegion() //
 				&& ensureTopicName() //
 				&& ensureTopicARN() //
 		;
@@ -452,7 +501,15 @@ public class Appender extends AppenderSkeleton {
 		}
 	}
 
-	public String getCredentials() {
+    public String getRegionName() {
+        return regionName;
+    }
+
+    public void setRegionName(String regionName) {
+        this.regionName = regionName;
+    }
+
+    public String getCredentials() {
 		return credentials;
 	}
 

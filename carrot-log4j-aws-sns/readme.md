@@ -39,7 +39,9 @@ so we made a new one:
 
 * uses decoupled dependencies (maven scope provided)
 
-* reads amazon credentials from external file
+* reads amazon credentials from URL, classpath or external file
+
+* sets AWS region for topic (defaults to US-EAST-1)
 
 * does not try to create topics on demand (security requirement)
 
@@ -56,6 +58,7 @@ so we made a new one:
 log4j.appender.SNS=com.carrotgarden.log4j.aws.sns.Appender
 log4j.appender.SNS.threshold=INFO
 log4j.appender.SNS.credentials=${user.home}/.amazon/publish-notification.properties
+log4j.appender.SNS.regionName=us-east-1
 log4j.appender.SNS.topicName=carrot-tester
 log4j.appender.SNS.topicSubject=karaf.company.com
 log4j.appender.SNS.evaluatorClassName=com.carrotgarden.log4j.aws.sns.EvaluatorThrottler

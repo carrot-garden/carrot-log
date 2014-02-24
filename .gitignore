@@ -4,6 +4,10 @@
 .classpath
 .settings/
 
+*.ipr
+*.iml
+*.iws
+
 bin/
 target/
 
