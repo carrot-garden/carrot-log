@@ -7,8 +7,8 @@
  */
 package com.carrotgarden.log4j.aws.sns;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.PropertiesCredentials;
+import com.amazonaws.auth.*;
+import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.regions.Regions;
@@ -29,8 +29,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -154,7 +152,7 @@ public class Appender extends AppenderSkeleton {
 	/** AWS SNS client dedicated to the appender */
 	protected AmazonSNSAsync amazonClient;
 
-    protected PropertiesCredentials amazonCredentials;
+    protected AWSCredentialsProvider amazonCredentials;
 
     /** AWS SNS region */
     protected Region awsSnsRegion;
@@ -171,6 +169,14 @@ public class Appender extends AppenderSkeleton {
 
 	public boolean isTriggering(final LoggingEvent event) {
 		return isActive && evaluator.isTriggeringEvent(event);
+	}
+
+	public boolean hasAwsCredentialsOverride() {
+		return "true".equalsIgnoreCase(System.getProperty("aws_sns_credentials_override"));
+	}
+
+	public String getEnvAwsRegion() {
+		return System.getProperty("aws_sns_region");
 	}
 
 	public boolean hasCredentials() {
@@ -203,8 +209,11 @@ public class Appender extends AppenderSkeleton {
 
 	/** provide amazon login credentials from file */
 	protected boolean ensureCredentials() {
-
-        if (hasCredentials()) {
+		if (hasAwsCredentialsOverride()) {
+			amazonCredentials = new AWSCredentialsProviderChain(new InstanceProfileCredentialsProvider(),
+																new EnvironmentVariableCredentialsProvider(),
+																new SystemPropertiesCredentialsProvider());
+		} else if (hasCredentials()) {
             // Try to get URL and open stream
             // Any exception, try as file
             URL url = null;
@@ -216,14 +225,14 @@ public class Appender extends AppenderSkeleton {
 
             if (url != null) {
                 try {
-                    amazonCredentials = new PropertiesCredentials(url.openStream());
+                    amazonCredentials = new StaticCredentialsProvider(new PropertiesCredentials(url.openStream()));
                     return true;
                 } catch (Exception e) {
                     // fail out
                 }
             } else {
                 try {
-                    amazonCredentials = new PropertiesCredentials(new File(getCredentials()));
+                    amazonCredentials = new StaticCredentialsProvider(new PropertiesCredentials(new File(getCredentials())));
                     return true;
                 } catch (Exception e2) {
                     // fail out
@@ -277,23 +286,31 @@ public class Appender extends AppenderSkeleton {
 
     /** instantiate amazon region */
     protected boolean ensureAmazonRegion() {
-
-        try {
-            awsSnsRegion = RegionUtils.getRegion(regionName);
-
-            amazonClient.setRegion(awsSnsRegion);
-
-            return true;
-
-        } catch (final Exception e) {
-
-            LogLog.error("sns: amazon region init failure", e);
-
-            return false;
-
-        }
-
+		String envRegionName = getEnvAwsRegion();
+		if (envRegionName != null && !envRegionName.isEmpty()) {
+			return this.ensureAmazonRegion(envRegionName);
+		} else if (this.regionName != null && !this.regionName.isEmpty()) {
+			return this.ensureAmazonRegion(this.regionName);
+		}
+		return false;
     }
+
+	protected boolean ensureAmazonRegion(String regionName) {
+		try {
+			awsSnsRegion = RegionUtils.getRegion(regionName);
+
+			amazonClient.setRegion(awsSnsRegion);
+
+			return true;
+
+		} catch (final Exception e) {
+
+			LogLog.error("sns: amazon region init failure", e);
+
+			return false;
+
+		}
+	}
 
     /** resolve topic ARN from topic name */
 	protected boolean ensureTopicARN() {
