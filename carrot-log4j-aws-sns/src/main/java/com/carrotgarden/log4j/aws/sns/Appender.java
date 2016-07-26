@@ -177,10 +177,6 @@ public class Appender extends AppenderSkeleton {
 		return System.getProperty("aws_sns_region");
 	}
 
-	public boolean hasCredentials() {
-		return credentials != null;
-	}
-
 	public boolean hasTopicName() {
 		return topicName != null;
 	}
@@ -195,10 +191,6 @@ public class Appender extends AppenderSkeleton {
 
 	public boolean hasLayout() {
 		return layout != null;
-	}
-
-	public boolean hasTopicARN() {
-		return topicARN != null;
 	}
 
 	public boolean hasAmazonClient() {
