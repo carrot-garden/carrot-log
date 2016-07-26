@@ -7,8 +7,14 @@
  */
 package com.carrotgarden.log4j.aws.sns;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.PropertiesCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSCredentialsProviderChain;
+import com.amazonaws.auth.ClasspathPropertiesFileCredentialsProvider;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.auth.PropertiesFileCredentialsProvider;
+import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.regions.Regions;
@@ -20,7 +26,6 @@ import com.amazonaws.services.sns.model.Topic;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Layout;
 import org.apache.log4j.PatternLayout;
-import org.apache.log4j.helpers.Loader;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.helpers.OptionConverter;
 import org.apache.log4j.spi.LoggingEvent;
@@ -28,11 +33,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -154,7 +154,7 @@ public class Appender extends AppenderSkeleton {
 	/** AWS SNS client dedicated to the appender */
 	protected AmazonSNSAsync amazonClient;
 
-    protected PropertiesCredentials amazonCredentials;
+    protected AWSCredentialsProvider amazonCredentials;
 
     /** AWS SNS region */
     protected Region awsSnsRegion;
@@ -173,8 +173,8 @@ public class Appender extends AppenderSkeleton {
 		return isActive && evaluator.isTriggeringEvent(event);
 	}
 
-	public boolean hasCredentials() {
-		return credentials != null;
+	public String getEnvAwsRegion() {
+		return System.getProperty("aws_sns_region");
 	}
 
 	public boolean hasTopicName() {
@@ -193,48 +193,19 @@ public class Appender extends AppenderSkeleton {
 		return layout != null;
 	}
 
-	public boolean hasTopicARN() {
-		return topicARN != null;
-	}
-
 	public boolean hasAmazonClient() {
 		return amazonClient != null;
 	}
 
 	/** provide amazon login credentials from file */
 	protected boolean ensureCredentials() {
-
-        if (hasCredentials()) {
-            // Try to get URL and open stream
-            // Any exception, try as file
-            URL url = null;
-            try {
-                url = new URL(getCredentials());
-            } catch (MalformedURLException murle) {
-                url = Loader.getResource(getCredentials());
-            }
-
-            if (url != null) {
-                try {
-                    amazonCredentials = new PropertiesCredentials(url.openStream());
-                    return true;
-                } catch (Exception e) {
-                    // fail out
-                }
-            } else {
-                try {
-                    amazonCredentials = new PropertiesCredentials(new File(getCredentials()));
-                    return true;
-                } catch (Exception e2) {
-                    // fail out
-                }
-            }
-		}
-
-		LogLog.error("sns: invalid option", new IllegalArgumentException(
-				getCredentials() + " for Credentials"));
-
-		return false;
+		amazonCredentials = new AWSCredentialsProviderChain(new InstanceProfileCredentialsProvider(),
+															new EnvironmentVariableCredentialsProvider(),
+															new SystemPropertiesCredentialsProvider(),
+															new ProfileCredentialsProvider(),
+															new ClasspathPropertiesFileCredentialsProvider(getCredentials()),
+															new PropertiesFileCredentialsProvider(getCredentials()));
+		return true;
 
 	}
 
@@ -277,23 +248,31 @@ public class Appender extends AppenderSkeleton {
 
     /** instantiate amazon region */
     protected boolean ensureAmazonRegion() {
-
-        try {
-            awsSnsRegion = RegionUtils.getRegion(regionName);
-
-            amazonClient.setRegion(awsSnsRegion);
-
-            return true;
-
-        } catch (final Exception e) {
-
-            LogLog.error("sns: amazon region init failure", e);
-
-            return false;
-
-        }
-
+		String envRegionName = getEnvAwsRegion();
+		if (envRegionName != null && !envRegionName.isEmpty()) {
+			return this.ensureAmazonRegion(envRegionName);
+		} else if (this.regionName != null && !this.regionName.isEmpty()) {
+			return this.ensureAmazonRegion(this.regionName);
+		}
+		return false;
     }
+
+	protected boolean ensureAmazonRegion(String regionName) {
+		try {
+			awsSnsRegion = RegionUtils.getRegion(regionName);
+
+			amazonClient.setRegion(awsSnsRegion);
+
+			return true;
+
+		} catch (final Exception e) {
+
+			LogLog.error("sns: amazon region init failure", e);
+
+			return false;
+
+		}
+	}
 
     /** resolve topic ARN from topic name */
 	protected boolean ensureTopicARN() {
