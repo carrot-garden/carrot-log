@@ -12,6 +12,7 @@ import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.ClasspathPropertiesFileCredentialsProvider;
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.auth.PropertiesFileCredentialsProvider;
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
@@ -210,7 +211,8 @@ public class Appender extends AppenderSkeleton {
 															new EnvironmentVariableCredentialsProvider(),
 															new SystemPropertiesCredentialsProvider(),
 															new ProfileCredentialsProvider(),
-															new ClasspathPropertiesFileCredentialsProvider(getCredentials()));
+															new ClasspathPropertiesFileCredentialsProvider(getCredentials()),
+															new PropertiesFileCredentialsProvider(getCredentials()));
 		return true;
 
 	}
