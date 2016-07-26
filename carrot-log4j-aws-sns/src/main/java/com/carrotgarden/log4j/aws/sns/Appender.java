@@ -7,14 +7,13 @@
  */
 package com.carrotgarden.log4j.aws.sns;
 
-import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSCredentialsProviderChain;
-import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.ClasspathPropertiesFileCredentialsProvider;
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.auth.PropertiesFileCredentialsProvider;
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.regions.Regions;
@@ -26,7 +25,6 @@ import com.amazonaws.services.sns.model.Topic;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Layout;
 import org.apache.log4j.PatternLayout;
-import org.apache.log4j.helpers.Loader;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.helpers.OptionConverter;
 import org.apache.log4j.spi.LoggingEvent;
@@ -34,11 +32,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.*;
 
 /**
@@ -216,65 +210,13 @@ public class Appender extends AppenderSkeleton {
 
 	/** provide amazon login credentials from file */
 	protected boolean ensureCredentials() {
-		if (hasAwsCredentialsOverride()) {
-			amazonCredentials = new AWSCredentialsProviderChain(new InstanceProfileCredentialsProvider(),
-																new EnvironmentVariableCredentialsProvider(),
-																new SystemPropertiesCredentialsProvider());
-		} else if (hasCredentials()) {
-            // Try to get URL and open stream
-            // Any exception, try as file
-            URL url = null;
-            try {
-                url = new URL(getCredentials());
-            } catch (MalformedURLException murle) {
-                url = Loader.getResource(getCredentials());
-            }
+		amazonCredentials = new AWSCredentialsProviderChain(new InstanceProfileCredentialsProvider(),
+															new EnvironmentVariableCredentialsProvider(),
+															new SystemPropertiesCredentialsProvider(),
+															new ProfileCredentialsProvider(),
+															new ClasspathPropertiesFileCredentialsProvider(getCredentials()));
+		return true;
 
-            if (url != null) {
-                try {
-					amazonCredentials = getRemoteFileCredentials(url);
-                    return true;
-                } catch (Exception e) {
-                    // fail out
-                }
-            } else {
-                try {
-                    amazonCredentials = new PropertiesFileCredentialsProvider(getCredentials());
-                    return true;
-                } catch (Exception e2) {
-                    // fail out
-                }
-            }
-		}
-
-		LogLog.error("sns: invalid option", new IllegalArgumentException(
-				getCredentials() + " for Credentials"));
-
-		return false;
-
-	}
-
-	protected AWSCredentialsProvider getRemoteFileCredentials(URL url) throws IOException {
-		Properties accountProperties = new Properties();
-		//we already know this is a url at this point - so shouldn't really throw but caller has a try/catch regardless
-		accountProperties.load(url.openStream());
-		final String accessKey = accountProperties.getProperty("accessKey");
-		final String secretKey = accountProperties.getProperty("secretKey");
-
-		if (accessKey == null || accessKey.isEmpty() || secretKey == null || secretKey.isEmpty()) {
-			throw new IllegalArgumentException("The remote properties file does not contain accessKey/secretKey.");
-		}
-
-		return new AWSCredentialsProvider() {
-			@Override
-			public AWSCredentials getCredentials() {
-				return new BasicAWSCredentials(accessKey,secretKey);
-			}
-
-			@Override
-			public void refresh() {
-			}
-		};
 	}
 
 	/** amazon topic name is required option */
