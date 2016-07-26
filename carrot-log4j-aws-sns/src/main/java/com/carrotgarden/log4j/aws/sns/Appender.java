@@ -7,8 +7,14 @@
  */
 package com.carrotgarden.log4j.aws.sns;
 
-import com.amazonaws.auth.*;
-import com.amazonaws.internal.StaticCredentialsProvider;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSCredentialsProviderChain;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.auth.PropertiesFileCredentialsProvider;
+import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.regions.Regions;
@@ -28,10 +34,11 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
 
-import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.*;
 
 /**
@@ -225,14 +232,14 @@ public class Appender extends AppenderSkeleton {
 
             if (url != null) {
                 try {
-                    amazonCredentials = new StaticCredentialsProvider(new PropertiesCredentials(url.openStream()));
+					amazonCredentials = getRemoteFileCredentials(url);
                     return true;
                 } catch (Exception e) {
                     // fail out
                 }
             } else {
                 try {
-                    amazonCredentials = new StaticCredentialsProvider(new PropertiesCredentials(new File(getCredentials())));
+                    amazonCredentials = new PropertiesFileCredentialsProvider(getCredentials());
                     return true;
                 } catch (Exception e2) {
                     // fail out
@@ -245,6 +252,29 @@ public class Appender extends AppenderSkeleton {
 
 		return false;
 
+	}
+
+	protected AWSCredentialsProvider getRemoteFileCredentials(URL url) throws IOException {
+		Properties accountProperties = new Properties();
+		//we already know this is a url at this point - so shouldn't really throw but caller has a try/catch regardless
+		accountProperties.load(url.openStream());
+		final String accessKey = accountProperties.getProperty("accessKey");
+		final String secretKey = accountProperties.getProperty("secretKey");
+
+		if (accessKey == null || accessKey.isEmpty() || secretKey == null || secretKey.isEmpty()) {
+			throw new IllegalArgumentException("The remote properties file does not contain accessKey/secretKey.");
+		}
+
+		return new AWSCredentialsProvider() {
+			@Override
+			public AWSCredentials getCredentials() {
+				return new BasicAWSCredentials(accessKey,secretKey);
+			}
+
+			@Override
+			public void refresh() {
+			}
+		};
 	}
 
 	/** amazon topic name is required option */
