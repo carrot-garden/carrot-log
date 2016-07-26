@@ -172,10 +172,6 @@ public class Appender extends AppenderSkeleton {
 		return isActive && evaluator.isTriggeringEvent(event);
 	}
 
-	public boolean hasAwsCredentialsOverride() {
-		return "true".equalsIgnoreCase(System.getProperty("aws_sns_credentials_override"));
-	}
-
 	public String getEnvAwsRegion() {
 		return System.getProperty("aws_sns_region");
 	}
